@@ -2,5 +2,6 @@ language: cpp
 before_install:
   - wget http://archive.ubuntu.com/ubuntu/pool/universe/p/pybind11/pybind11-dev_2.0.1-4_all.deb
   - sudo dpkg -i pybind11-dev_2.0.1-4_all.deb
+  - sudo apt-get install python3-dev
 script: "make test"
 sudo: false
