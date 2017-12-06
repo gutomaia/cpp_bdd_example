@@ -15,6 +15,11 @@ CHECKPOINT=${CHECKPOINT_DIR}/.check
 
 EXTENSION=${shell python${PYTHON_MAJOR}-config --extension-suffix}
 
+OK=\033[32m[OK]\033[39m
+FAIL=\033[31m[FAIL]\033[39m
+CHECK=@if [ $$? -eq 0 ]; then echo "${OK}"; else echo "${FAIL}"; cat ${DEBUG} ; fi
+
+
 ifeq "3" "$PYTHON_MAJOR"
 PYTHON_LIB=python${PYTHON_VERSION}m
 else
@@ -37,13 +42,19 @@ ${OUTPUT}: py_example.c example.c
 	$(CC) $(CFLAGS) --shared -o $@ $(LIBDIR) $< $(LIBS)
 
 ${VIRTUALENV_CMD}:
+	@echo "Creating VirtualEnv: \c"
 	@test -d ${VIRTUALENV_DIR} || virtualenv ${VIRTUALENV_ARGS} ${VIRTUALENV_DIR} > /dev/null && touch $@
+	${CHECK}
 
 ${CHECKPOINT}:
+	@echo "Creating Checkpoint dir: \c"
 	@mkdir -p ${CHECKPOINT_DIR} && touch $@
+	${CHECK}
 
 ${CHECKPOINT_DIR}/upgrade_pip: ${CHECKPOINT} ${VIRTUALENV_CMD}
+	@echo "Upgrading Python pip: \c"
 	@${VIRTUALENV} pip install --upgrade pip && touch $@
+	${CHECK}
 
 ${CHECKPOINT_DIR}/requirements.txt: requirements.txt ${CHECKPOINT_DIR}/upgrade_pip
 	@${VIRTUALENV} pip install -r requirements.txt && touch $@
